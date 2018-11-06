@@ -1,75 +1,1342 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="https://cdn.mxpnl.com/libs/mixpanel-platform/css/reset.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.mxpnl.com/libs/mixpanel-platform/build/mixpanel-platform.v0.latest.min.css">
     <script src="https://cdn.mxpnl.com/libs/mixpanel-platform/build/mixpanel-platform.v0.latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.4/js/standalone/selectize.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.4/css/selectize.default.css" rel="stylesheet" />
   </head>
+  <style>
+    body {
+      max-width: 1471px;
+      min-width: 981px;
+      color: #3b3f58;    
+    }
+
+    .column-wrapper {
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .column {
+      width: 49%;
+      padding: 10px;
+    }
+
+    .column-left {
+      border-right: 2px solid #d6dae5;
+    }
+
+    .column-section {
+      padding-top: 15px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #d6dae5;
+    }
+
+    .column-label {
+      display: block;
+      padding-bottom: 10px;
+    }
+
+    .inputs-bottom {
+      margin-top: 10px;
+      margin-left: 10px;
+      margin-right: 10px;
+      padding-bottom: 30px;
+      border-bottom: 2px solid #d6dae5;
+    }
+
+    .global-prop-filters {
+      padding-top: 10px;
+      padding-bottom: 25px;
+    }
+
+    .input-toggles {
+      display: flex;
+        justify-content: space-around;
+        max-width: 950px;
+      margin: 30px auto;
+    }
+
+    .rounded-toggle-wrapper {
+      display: inline-block;
+    }
+
+    .rounded-toggle-wrapper > * {
+      display: inline-block;
+    }
+
+    .rounded-toggle-wrapper:hover {
+      cursor: pointer;
+    }
+
+    .rounded-toggle-title {
+        display: block;
+        text-align: center;
+        padding-bottom: 10px;
+        font-weight: 500;
+        font-size: 1.5em;
+        color: #3b3f58;
+    }
+
+    .rounded-toggle-text {
+      font-size: 1.5em;
+      font-weight: 500;
+      vertical-align: text-bottom;
+      margin-left: 5px;
+      margin-right: 5px;
+      color: #95999c;
+      transition: all 0.22s;
+    }
+
+    .rounded-toggle-text:after {
+      content: '';
+      width: 0%;
+      display: block;
+      height: 2px;
+      background-color: silver;
+      transition: all 0.22s;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .rounded-toggle-text-selected {
+      color: #2588df;
+    }
+
+    .rounded-toggle-text-selected:after {
+      content: '';
+      width: 100%;
+      display: block;
+      height: 2px;
+      background-color: #0759a2
+    }
+
+    .rounded-toggle-bar {
+      height: 26px;
+      width: 50px;
+      background-color: #c0c0c0;
+      border-radius: 20px;
+      transition: all 0.22s;
+    }
+
+    .rounded-toggle-bar-right {
+      background-color: #dac4c4;
+    }
+
+    .rounded-toggle-circle {
+      width: 22px;
+        height: 22px;
+        background-color: #2588df;
+        border-radius: 100%;
+        margin-top: 2px;
+        transition: all 0.26s;
+    }
+
+    .rounded-toggle-circle-left {
+      margin-left: 3px;
+    }
+
+    .rounded-toggle-circle-right {
+      margin-left: 25px;
+    }
+
+    #run, #export, #generate, #annotationRun {
+      padding: 14px 32px;
+      margin: 0 auto;
+    }
+
+    #run:hover, #export:hover, #generate:hover, #annotationRun:hover {
+      background-image: linear-gradient(#60abe7,#408edd);
+    }
+
+    #left_universe, #right_universe {
+      margin-top: 15px;
+      margin-bottom: 15px;
+    }
+
+    .alert-ok:hover {
+      cursor: pointer;
+      background-color: #c7c7c7;
+    }
+
+    .comparison-table-header {
+      width: 25%;
+      text-align: center;
+      font-weight: bold;
+      font-size: 15px;
+      border: 1px solid #b2b2b2;
+    }
+
+    .comparison-table-data {
+      width: 25%;
+      text-align: center;
+      font-weight: bold;
+      font-size: 15px;
+      border: 1px solid #b2b2b2;
+    }
+
+    .annotation-table-data {
+      width: 25%;
+      text-align: center;
+      font-weight: bold;
+      font-size: 15px;
+      border: 1px solid #b2b2b2;
+    }
+
+    .events_label {
+        font-weight: bold;
+        font-size: 15px;
+        margin-right: 8px;
+        margin-left: 8px;
+        display: inline-block;
+    }
+
+    .date_select.inline.block, .event_select.inline.block, .event_select_right.inline.block, .event_select_filter_left.inline.block, .event_select_filter_right.inline.block, .prop_select.inline.block, .behavior_select.inline.block, .right-arrow, #event-add, .props-add, .props-add-secondary, #event-remove, .props-remove, .props-remove-secondary {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .event_select.inline.block, .event_select_right.inline.block, .prop_select.inline.block.prop_selector, .prop_select.inline.block.value_selector, .prop_select.inline.block.operator_selector, .prop_select.inline.block.prop_selector_secondary, .prop_select.inline.block.value_selector_secondary, .prop_select.inline.block.operator_selector_secondary {
+        width: 200px;
+        margin: 10px 0;
+    }
+
+    .dates, .options {
+        margin-bottom: 10px;
+    }
+
+    .right-arrow {
+        background: url(https://lh3.googleusercontent.com/pGEN9VI0Gx6UEoQ0T3NODggKtPoYWEEnRLMgesYyeV-a7qylLPJwZoyUQPcI7CpM0YQEqyJgAhg9cgwgv0MbxgE-AAWmAyehPAamymgPzmtTTj10s7hpC2EZomaO_pCgNdpOK--4OABciLB2l3hUHiHk0_uvyk62J2ufZVmwx--wwA3tYyYNGKMtKR8HGg1Ya92GYvyahBvFlf1fnbx77V5tUApDZszJdEVWeTPWyPcGsQDBCq8w_sUhhbKRbiOlhhfW9E_dL-jleUJsJhipbj29ASmN7JyxtfO-MmRo5d_dx5dgKwXAZC5ep2lCUmBwMUrR-j3T5_wGy9DmHjE0g6UpgiWNfSpaNgWHOaXmSIw6iA9gwtviP5YKNc8IbzeQzx4XtllneyDI09lu7PSueq0WSJDl1-U2biednKbRfYy58t7g7twiAYylARw5ZqAY1VleSB857q5rA6OhJNRNJ-Evtup_3WvXTUiPvPps_ACK9v1rji-jYPjser_jVRKtmbS1STxFvOCQtT9Fi22lou3lpe_o5nEmIYeLJwcA-m07HhnvyYvPqVTooTyOMhKh-2TN-aHJvZsebSZ3dGgnV5Day0mZCPNd3CpbsDCB=w5-h9-no) no-repeat;
+        background-position: 0 0;
+        height: 10px;
+        width: 10px;
+        margin: 10px;
+    }
+
+    #event-add, .props-add, .props-add-secondary {
+        background: url(https://lh3.googleusercontent.com/FKWbo70kmD2jG8kHiWCqzJOJBvl3jntA4j4co3oMCoUtF5nw3q5qo9cSDYHKznkwizWdisnOQKUk1eW-Jza60kMV7pLZTNblWEVpEmw8fTmJ-B2ydiKvtCS2gH1FYUzvmAta9PW1IPSYXTWGdFAdtku8-NOGu9NDdXmBWLiTceMpHOlcWL9sBP0Nrg5JXN0PJ4uyclNLEp_IcHGQhRtzC8TKwdduA7vvJqmUkB303Mq-ZTCgOosAUQXwXYTwEdQVEzD-B-gE68AUro17QN8i1OXiobSDai5wkgf7ZLKRXh11_VRuxAxZnY7wU16x0f0Giw7qqcztrA3fCgZuTXVE-gXZOdbxOB6bg2KC378at0lzd8sOrEQVjUjNzWtrP8vxdY5gnTKyDX2mY6HcgDPOx_AlHBrz_LSz2nY1GxqVW-Eo4GXxIyk1nmoGRXVkDmR2OpuIRFAgSDF-Hs5e7HgDF5ZOrmlPaLaDsDcNr2bPpax2UlFNn_5wKb9-t_nSg21zkFw6DrdDzAtz1_08rS-KUiWNkRbluZfiVSeN5cn66zIOkAHaxaTusfKQp__8GzX5SjPFW6jg0-Dqs5qyvPhKXiS1lXXC9KM8ZdQ6aRJB=s30-no);
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        position: relative;
+        margin-left: 15px;
+    }
+
+    #event-add:hover, .props-add:hover, .props-add-secondary:hover {
+        background-position: 0px -30px;
+      }
+
+    #event-add:active, .props-add:active, .props-add-secondary:hover {
+        background-position: 0px 30px;
+    }
+
+    #event-remove, .props-remove, .props-remove-secondary {
+        background: url(https://lh3.googleusercontent.com/0y0bBP5VnuDIGupEh3zoZTfXLARVbWcFWl6YsDm_B64oyaI4L37D0S7N3RBWo-8l5lQWMJ4b9OWrY0i-3KL95dJs7cehFBln00ru1iufDOMADQvIQweSfROeEzvbFXhkSrdokmZ5M1Hr25UjFJbZyaEvJjNTLBFcUzS0AjZ2U3sknrKOdQ-oSj-SGuzzg1e6vMlzoXQwLpLir5PmkHD8DW8__ad7SOED3nkTtlwOkiXlNS55X5w9LWn58ry4Xm9xpPecGybpP_0bOJv9OPCvlTGDAzz7s0yDH7G6-41ipldZpdoy43Js8ia-2GYFGRqgAeixtRgVXjepIKJ1dVsy6RIK-QJcfdcYhCSkwGvtkKd3IvpgyqfJ8JRXLKbohCwkKjuADsXr6LAJA2KsM2yqEkX7q5TSdb1D4kjrkrQ6mS_eQsiK5akDcFzygEOFWHMJOCVoE-NTgTxhY-fJHbxb_v5uFkNtUn9IDOqcFXKX99i2PjlVj6x-2rvAC9il37RnwktjZCQtQVNSY61bEv8EAgC-zgcpQcB4yrLWWjP5JdQaFtkdIjie0nsLgffFKrk6khCoZ9HzsyktBvIqWlf5Y8fc8K82_3jjiV2UOiF4=s18-no);
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        position: relative;
+        margin-left: 15px;
+    }
+
+    #event-remove:hover, .props-remove:hover, .props-remove-secondary:hover {
+        background-position: 0px 18px;
+    }
+
+    #run, #export, #generate {
+        clear:both;
+        vertical-align: 1px;
+        text-align: center;
+        padding: 20px 10px;
+        background-color: #61adf0;
+        background-image: -webkit-linear-gradient(#6ab5f2,#53a0ee);
+        background-image: linear-gradient(#6ab5f2,#53a0ee);
+        box-shadow: inset 0 1px 1px #77bdf4,0 2px 2px -1px rgba(0,0,0,0.2);
+        text-transform: uppercase;
+        border: 1px solid #4d93d7;
+        color: #fff;
+        text-shadow: 0 -1px 0 rgba(0,0,0,0.2);
+        border-radius: 3px;
+        cursor: pointer;
+        font-weight: bold;
+        max-width: 150px;
+        margin-left: 20px;
+        display: inline-block;
+    }
+
+    .alert {
+        display: none;
+        position: fixed;
+        margin: 0 auto;
+        left: 0;
+        right: 0;
+        top: 30%;
+        margin-top: -75px;
+        z-index: 20;
+        background-color: #fbfbfb;
+        border: 1px solid #c4c9d8;
+        padding: 20px;
+        width: 300px;
+        min-height: 150px;
+        border-radius: 5px;
+    }
+
+    .alert-title {
+        text-transform: uppercase;
+        font-weight: 600;
+        margin: 15px;
+    }
+
+    .alert-content {
+        margin: 15px;
+        line-height: 25px;
+    }
+
+    .alert-ok {
+        display: inline-block;
+        margin-left: 10px;
+        position: absolute;
+        bottom: 15px;
+        right: 35px;
+        padding: 10px 16px;
+        font-weight: 600;
+        background-color: #dedede;
+        border-radius: 3px;
+        transition: all 0.2s;
+    }
+
+    #input {
+        width: 75%;
+    }
+
+    .buttons {
+        display: flex;
+        justify-content: space-around;
+        max-width: 950px;
+        margin: 30px auto;
+    }
+  </style>
   <body class="mixpanel-platform-body">
     <div class="mixpanel-platform-section">
-      <div id="eventSelect" style="float: left;"></div>
-      <div id="by" class="mixpanel-platform-label" style="margin-left: 10px; display: none;">by</div>
-      <div id="propSelect" style="float: left;"></div>
-      <div id="birthSelect" style="float: left;"></div>
-      <div id="by" class="mixpanel-platform-label" style="margin-left: 10px; display: none;">by</div>
-      <div id="birthpSelect" style="float: left;"></div>
-      <div id="dateSelect" style="float: right;"></div>
-      <div style="clear: both;"></div>
-      <div id="graph"></div>
+        <div class="funnel">
+
+          <div class="column-section date-range">
+            <div class="events_label">Date Range:</div>
+            <div id="date-select" class="date_select inline block"></div>
+          </div>
+
+          <div class="column-section" id="event-steps">
+            <div class="column-label events_label">Steps:</div>
+            <div id="event-add"></div>
+            <div id="event-remove"></div>
+          </div>
+
+          <div class="column-section" id="props-filters">
+            <div class="column-label events_label" id="filter-label">Property Primary Filters:</div>
+          </div>
+
+          <div class="column-section" id="props-filters-secondary">
+            <div class="column-label events_label" id="filter-label-secondary">OR: Property Secondary Filters:</div>
+          </div>
+        </div>
+
+      <div class="inputs-bottom">
+        <div class="input-toggles">
+          <!-- Toggle for chart type (bar/line) -->
+          <div>
+              <div class="rounded-toggle-title">Chart Type</div>
+            <div id="chart-type-toggle" class="rounded-toggle-wrapper">
+              <div class="rounded-toggle-text rounded-toggle-text-left rounded-toggle-text-selected">Bar</div>
+              <div class="rounded-toggle-bar">
+                <div class="rounded-toggle-circle rounded-toggle-circle-left"></div>
+              </div>
+              <div class="rounded-toggle-text rounded-toggle-text-right">Line</div>
+            </div>
+          </div>
+          <!-- Dropdown for Session Timeout -->
+          <div>
+            <div class="rounded-toggle-title">Session Timeout (minutes)</div>
+            <center><input type="text" id="windowTime" size="10"></input></center>
+          </div>          
+        </div>
+        
+        <div class="buttons">
+          <div id="run">RUN REPORT</div>
+          <div id="export">EXPORT DATA</div>
+        </div>
+      </div>
+
+      <!-- Begin Results -->
+      <div id="graphs">
+        <div class="funnelGraph" id="funnelLine" align="center"></div><div class="funnelGraph" id="funnelBar" align="center"></div>
+      </div>
+      <br>
+      <div>
+        <div id="table"></div>
+      </div>
+      <br>
     </div>
-    <div id="table"></div>
+    
     <script>
-      MP.api.ready(function() {
-        var eventSelect = $('#eventSelect').MPEventSelect();
-        var dateSelect  = $('#dateSelect').MPDatepicker();
-        var eventGraph  = $('#graph').MPChart({chartType: 'line'});
-        var eventTable  = $('#table').MPTable({
-          showPercentages: true,
-          firstColHeader: 'Date'
-        });
-        
-        var params = {
-          'from': '2015-01-01', //moment(),
-          'to': '2015-01-01', //moment(),
-          'unit': 'month',
-          'interval_count': 12,
-          'born_event': '$signup'
-        };
+
+      // Toggle variables & logic
+      var chartTypeState = "left";
+      var chartTypeLeft = "bar";
+      var chartTypeRight = "line";
+      var chartTypeVal = chartTypeLeft;
+
+      $('#chart-type-toggle').on('click', function() {
+        var toggle = $('#chart-type-toggle');
+        // Select Right Toggle
+        if (chartTypeState === 'left') {
+          chartTypeState = 'right';
+          chartTypeVal = chartTypeRight;
           
-        var runQuery = function() {
-          var eventName = eventSelect.MPEventSelect('value'),
-              dateRange = dateSelect.MPDatepicker('value');
+          console.log(chartTypeVal);
+
+          toggle.find($('.rounded-toggle-text-right')).addClass('rounded-toggle-text-selected');
+          toggle.find($('.rounded-toggle-text-left')).removeClass('rounded-toggle-text-selected');
+
+          toggle.find($('.rounded-toggle-circle')).removeClass('rounded-toggle-circle-left');
+          toggle.find($('.rounded-toggle-circle')).addClass('rounded-toggle-circle-right');
+
+          toggle.find($('.rounded-toggle-text-left')).removeClass('rounded-toggle-circle-left-selected');
+          toggle.find($('.rounded-toggle-text-right')).addClass('rounded-toggle-circle-right-selected');
           
-          params['from'] = dateRange.from.toISOString().substring(0, 10);
-          params['to'] = dateRange.to.toISOString().substring(0, 10);
-          var range =  Math.floor((Date.parse(dateRange.to) - Date.parse(dateRange.from)) / 86400000);
-          
-          if (eventName) {
-            var current_date = dateRange.from;
-            var totalResults = {};
-            for(i=0; i<range; i++){
-              MP.api.retention(eventName, params).done(function(results) {
-                //eventTable.MPTable('setData', results);
-                params['from'] = current_date.toISOString().substring(0, 10);
-                var jsonobj = results.values();
-                console.log(jsonobj);
-                totalResults[current_date.toISOString().substring(0, 10)] = jsonobj[current_date.toISOString().substring(0, 10)];
-                console.log(totalResults);
-                current_date.setDate(current_date.getDate() + 1);
-              });
-            }
+          if(lineData != {}) {
+            $("#funnelBar").empty();
+            $("#funnelLine").MPChart({chartType: 'line'});
+            $("#funnelLine").MPChart('setData', lineData);
           }
-          eventTable.MPTable('setData', totalResults);
         }
-        
-        dateSelect.on('change', function(e, dateRange) {
-          runQuery();
-        });
-              
-        eventSelect.on('change', function(e, eventName) {
-          runQuery();
+        // Select Left Toggle        
+        else {
+          chartTypeState = 'left';
+          chartTypeVal = chartTypeLeft;
+          
+          console.log(chartTypeVal);
+
+          toggle.find($('.rounded-toggle-text-left')).addClass('rounded-toggle-text-selected');
+          toggle.find($('.rounded-toggle-text-right')).removeClass('rounded-toggle-text-selected');
+
+          toggle.find($('.rounded-toggle-circle')).removeClass('rounded-toggle-circle-right');
+          toggle.find($('.rounded-toggle-circle')).addClass('rounded-toggle-circle-left');
+
+          toggle.find($('.rounded-toggle-text-left')).addClass('rounded-toggle-circle-left-selected');
+          toggle.find($('.rounded-toggle-text-right')).removeClass('rounded-toggle-circle-right-selected');
+          
+          if(barData != {}) {
+            $("#funnelLine").empty();
+            $("#funnelBar").MPChart({chartType: 'bar'});
+            $("#funnelBar").MPChart('setData', barData);
+          }
+        }
+      });
+      // End Toggle variables & logic
+
+      // add elements
+      var eventList = [];
+      var propList = [];
+      var valueList = [];
+      var propSecondaryList = [];
+      var valueSecondaryList = [];
+      var cachedPropertyValues = {};
+      var globalEventsOptions = { items: [] };
+      var globalPropsOptions = { items: [] };
+      var $eventsList = $('#event-steps');
+      var $eventsAdd = $('#event-steps').find('#event-add');
+      var $propsList = $('#props-filters');
+      var $propsSecondaryList = $('#props-filters-secondary');
+      $('#date-select').MPDatepicker();
+      var exportData = [];
+      var lineData = {};
+      var barData = {};
+
+      MP.api.MAX_SIMULTANEOUS_QUERIES = 5;
+
+      var params = {
+        'limit': 1500
+      }
+
+      MP.api.topEvents(params).done(function(results) {
+        console.log(results.values())
+        _.each(results.values(), function(item) {
+          globalEventsOptions.items.push({label: item, value: item});
         });
       });
+
+      function addEvent(i) {
+        if (i > 0) {
+          $('<div class="right-arrow events" id="' + i + '"></div>').insertBefore($eventsAdd);
+          $('<div class="property-container" id="' + i + '"><div class="column-label events_label">Funnel Step ' + (i+1) + ' Filters:</div><div class="props-add" id="' + i + '"></div><div class="props-remove" id="' + i + '"></div></div>').insertAfter($($('.property-container')[i-1]));
+          $('<div class="property-container-secondary" id="' + i + '"><div class="column-label events_label">Funnel Step ' + (i+1) + ' Filters:</div><div class="props-add-secondary" id="' + i + '"></div><div class="props-remove-secondary" id="' + i + '"></div></div>').insertAfter($($('.property-container-secondary')[i-1]));
+        } else {
+          $('<div class="property-container" id="' + i + '"><div class="column-label events_label">Funnel Step ' + (i+1) + ' Filters:</div><div class="props-add" id="' + i + '"></div><div class="props-remove" id="' + i + '"></div></div>').insertAfter($('#filter-label'));
+          $('<div class="property-container-secondary" id="' + i + '"><div class="column-label events_label">Funnel Step ' + (i+1) + ' Filters:</div><div class="props-add-secondary" id="' + i + '"></div><div class="props-remove-secondary" id="' + i + '"></div></div>').insertAfter($('#filter-label-secondary'));
+        }
+        
+        var localOptions = globalEventsOptions;
+        var eventSelect = $('<div class="event_select inline block" id="' + i + '"><div id="event_select' + i + '"></div></div>').insertBefore($eventsAdd);
+        var selectizeOptions = {
+          options: localOptions.items,
+          maxItems: null,
+          valueField: 'value',
+          labelField: 'label',
+          searchField: 'label'
+        }
+        $('#event_select' + i).selectize(selectizeOptions);
+        cachedPropertyValues[i] = {'props': [], 'event': ''};
+      }
+
+      function addProp(i, eventIndex) {
+
+        if(eventList[eventIndex][0] == null || eventList[eventIndex][0] == '') {
+          error('Please select an event for this step before adding property filters');
+        } else {
+          var $propsAdd = $($('.props-add')[eventIndex]);
+          if (i > 0) {
+            var valueBuffer = $('<div class="right-and events_label event' + eventIndex + '" id="' + i + '"> AND </div>').insertBefore($propsAdd);
+          }
+          
+          var localOptions = {};
+          localOptions.items = [];
+          if(cachedPropertyValues[eventIndex]['props'] == [] || eventList[eventIndex][0] !== cachedPropertyValues[eventIndex]['event']) {
+            
+            var params = {
+              'limit': 1500
+            };
+            
+            MP.api.topProperties(eventList[eventIndex][0], params).done(function(results) {
+              console.log(results.values());
+              var props = Object.keys(results.values()).sort();
+              _.each(props, function(item) {
+                localOptions.items.push({label: item, value: item});
+              });
+              propSelect = $('<div class="prop_select inline block prop_selector event' + eventIndex + '" id="' + i + '"></div>').insertBefore($propsAdd).MPSelect(localOptions);
+              cachedPropertyValues[eventIndex] = {};
+              cachedPropertyValues[eventIndex]['props'] = localOptions;
+              cachedPropertyValues[eventIndex]['event'] = eventList[eventIndex][0];
+  
+              propSelect.on('change', function(e, prop) {
+                console.log($('.prop_selector.event' + eventIndex).length);
+                console.log($('.value_selector.event' + eventIndex).length);
+                if($('.prop_selector.event' + eventIndex).length > $('.value_selector.event' + eventIndex).length) {
+                  addValue(i, eventIndex, false);
+                } else { // we are not adding a new value so replace the dropdown which was already there
+                  $($('.value_selector.event' + eventIndex)[i]).remove();
+                  addValue(i, eventIndex, true);
+                }
+              });
+            });
+          } else {
+            localOptions = cachedPropertyValues[eventIndex]['props'];
+            
+            propSelect = $('<div class="prop_select inline block prop_selector event' + eventIndex + '" id="' + i + '"></div>').insertBefore($propsAdd).MPSelect(localOptions);
+  
+            propSelect.on('change', function(e, prop) {
+              console.log($('.prop_selector.event' + eventIndex).length);
+              console.log($('.value_selector.event' + eventIndex).length);
+              if($('.prop_selector.event' + eventIndex).length > $('.value_selector.event' + eventIndex).length) {
+                addValue(i, eventIndex, false);
+              } else { // we are not adding a new value so replace the dropdown which was already there
+                $($('.value_selector.event' + eventIndex)[i]).remove();
+                addValue(i, eventIndex, true);
+              }
+            });
+          }
+        }
+      }
+
+      function addValue(i, eventIndex, newValue) {
+        
+        if(!newValue) {
+          var $propsAdd = $($('.props-add')[eventIndex]);
+
+          // to do: add more options in dropdown for categorizing the property filtering
+          var options = {};
+          options.items = [];
+          options.items.push({label: 'equals', value: 'equals'});
+          options.items.push({label: 'contains', value: 'contains'});
+          options.items.push({label: 'is set', value: 'set'});
+          options.items.push({label: 'is not set', value: 'notset'});
+          operatorSelect = $('<div class="prop_select inline block operator_selector event' + eventIndex + '" id="' + i + '"></div>').insertBefore($propsAdd).MPSelect(options);
+
+          // this runs automatically since the default options chosen is "equals"
+          MP.api.propertyValues(eventList[eventIndex][0], $($('.prop_selector.event' + eventIndex)[i]).val()).done(function(results) {
+            var options = {};
+            options.items = [];
+            var searchOptions = [];
+            _.each(results.values(), function(item) {
+              options.items.push({label: item, value: item});
+              searchOptions.push(item);
+            });
+
+            var valueSelect = $('<div class="prop_select inline block value_selector event' + eventIndex + '"><div id="event' + eventIndex + 'item' + i + '"></div></div>').insertBefore($propsAdd);
+            var selectizeOptions = {
+              options: options.items,
+              maxItems: null,
+              valueField: 'value',
+              labelField: 'label',
+              searchField: 'label'
+            }
+            $('#event' + eventIndex + 'item' + i).selectize(selectizeOptions);
+          });
+
+          operatorSelect.on('change', function(e, prop) {
+            console.log($($('.operator_selector.event' + eventIndex)[i]).val());
+            var operatorType = $($('.operator_selector.event' + eventIndex)[i]).val();
+            $($('.value_selector.event' + eventIndex)[i]).remove();
+            if(operatorType == 'equals') {
+              MP.api.propertyValues(eventList[eventIndex][0], $($('.prop_selector.event' + eventIndex)[i]).val()).done(function(results) {
+                var options = {};
+                options.items = [];
+                var searchOptions = [];
+                _.each(results.values(), function(item) {
+                  options.items.push({label: item, value: item});
+                  searchOptions.push(item);
+                });
+
+                var valueSelect = $('<div class="prop_select inline block value_selector event' + eventIndex + '"><div id="event' + eventIndex + 'item' + i + '"></div></div>').insertBefore($propsAdd);
+                var selectizeOptions = {
+                  options: options.items,
+                  maxItems: null,
+                  valueField: 'value',
+                  labelField: 'label',
+                  searchField: 'label'
+                }
+                $('#event' + eventIndex + 'item' + i).selectize(selectizeOptions);
+              });
+            } else if(operatorType == 'contains') {
+              var valueSelect = $('<div class="prop_select inline block value_selector event' + eventIndex + '"><div id="event' + eventIndex + 'item' + i + '"><input></input></div></div>').insertBefore($propsAdd);
+            } else if(operatorType == 'set' || operatorType == 'notset') {
+              // add a dummy container since there is no need for value selection in this case
+              var valueSelect = $('<div class="prop_select inline block value_selector event' + eventIndex + '"><div id="event' + eventIndex + 'item' + i + '"></div></div>').insertBefore($propsAdd);
+            }
+          });
+        } else {
+          var $propsAdd = $($('.right-and.event' + eventIndex)[i]);
+        }
+      }
+
+      function addSecondaryProp(i, eventIndex) {
+
+        if(eventList[eventIndex][0] == null || eventList[eventIndex][0] == '') {
+          error('Please select an event for this step before adding property filters');
+        } else {
+          var $propsAdd = $($('.props-add-secondary')[eventIndex]);
+          if (i > 0) {
+            var valueBuffer = $('<div class="right-and-secondary events_label event' + eventIndex + '" id="' + i + '"> AND </div>').insertBefore($propsAdd);
+          }
+          
+          var localOptions = {};
+          localOptions.items = [];
+          if(cachedPropertyValues[eventIndex]['props'] == [] || eventList[eventIndex][0] !== cachedPropertyValues[eventIndex]['event']) {
+            
+            var params = {
+              'limit': 1500
+            };
+            
+            MP.api.topProperties(eventList[eventIndex][0], params).done(function(results) {
+              console.log(results.values());
+              var props = Object.keys(results.values()).sort();
+              _.each(props, function(item) {
+                localOptions.items.push({label: item, value: item});
+              });
+              propSelect = $('<div class="prop_select inline block prop_selector_secondary event' + eventIndex + '" id="' + i + '"></div>').insertBefore($propsAdd).MPSelect(localOptions);
+              cachedPropertyValues[eventIndex] = {};
+              cachedPropertyValues[eventIndex]['props'] = localOptions;
+              cachedPropertyValues[eventIndex]['event'] = eventList[eventIndex][0];
+  
+              propSelect.on('change', function(e, prop) {
+                console.log($('.prop_selector_secondary.event' + eventIndex).length);
+                console.log($('.value_selector_secondary.event' + eventIndex).length);
+                if($('.prop_selector_secondary.event' + eventIndex).length > $('.value_selector_secondary.event' + eventIndex).length) {
+                  addSecondaryValue(i, eventIndex, false);
+                } else { // we are not adding a new value so replace the dropdown which was already there
+                  $($('.value_selector_secondary.event' + eventIndex)[i]).remove();
+                  addSecondaryValue(i, eventIndex, true);
+                }
+              });
+            });
+          } else {
+            localOptions = cachedPropertyValues[eventIndex]['props'];
+            
+            propSelect = $('<div class="prop_select inline block prop_selector_secondary event' + eventIndex + '" id="' + i + '"></div>').insertBefore($propsAdd).MPSelect(localOptions);
+  
+            propSelect.on('change', function(e, prop) {
+              console.log($('.prop_selector_secondary.event' + eventIndex).length);
+              console.log($('.value_selector_secondary.event' + eventIndex).length);
+              if($('.prop_selector_secondary.event' + eventIndex).length > $('.value_selector_secondary.event' + eventIndex).length) {
+                addSecondaryValue(i, eventIndex, false);
+              } else { // we are not adding a new value so replace the dropdown which was already there
+                $($('.value_selector_secondary.event' + eventIndex)[i]).remove();
+                addSecondaryValue(i, eventIndex, true);
+              }
+            });
+          }
+        }
+      }
+
+      function addSecondaryValue(i, eventIndex, newValue) {
+        
+        if(!newValue) {
+          var $propsAdd = $($('.props-add-secondary')[eventIndex]);
+
+          // to do: add more options in dropdown for categorizing the property filtering
+          var options = {};
+          options.items = [];
+          options.items.push({label: 'equals', value: 'equals'});
+          options.items.push({label: 'contains', value: 'contains'});
+          options.items.push({label: 'is set', value: 'set'});
+          options.items.push({label: 'is not set', value: 'notset'});
+          operatorSelect = $('<div class="prop_select inline block operator_selector_secondary event' + eventIndex + '" id="' + i + '"></div>').insertBefore($propsAdd).MPSelect(options);
+
+          // this runs automatically since the default options chosen is "equals"
+          MP.api.propertyValues(eventList[eventIndex][0], $($('.prop_selector_secondary.event' + eventIndex)[i]).val()).done(function(results) {
+            var options = {};
+            options.items = [];
+            var searchOptions = [];
+            _.each(results.values(), function(item) {
+              options.items.push({label: item, value: item});
+              searchOptions.push(item);
+            });
+
+            var valueSelect = $('<div class="prop_select inline block value_selector_secondary event' + eventIndex + '"><div id="event' + eventIndex + 'item' + i + 'secondary"></div></div>').insertBefore($propsAdd);
+            var selectizeOptions = {
+              options: options.items,
+              maxItems: null,
+              valueField: 'value',
+              labelField: 'label',
+              searchField: 'label'
+            }
+            $('#event' + eventIndex + 'item' + i + 'secondary').selectize(selectizeOptions);
+          });
+
+          operatorSelect.on('change', function(e, prop) {
+            console.log($($('.operator_selector_secondary.event' + eventIndex)[i]).val());
+            var operatorType = $($('.operator_selector_secondary.event' + eventIndex)[i]).val();
+            $($('.value_selector_secondary.event' + eventIndex)[i]).remove();
+            if(operatorType == 'equals') {
+              MP.api.propertyValues(eventList[eventIndex][0], $($('.prop_selector_secondary.event' + eventIndex)[i]).val()).done(function(results) {
+                var options = {};
+                options.items = [];
+                var searchOptions = [];
+                _.each(results.values(), function(item) {
+                  options.items.push({label: item, value: item});
+                  searchOptions.push(item);
+                });
+
+                var valueSelect = $('<div class="prop_select inline block value_selector_secondary event' + eventIndex + '"><div id="event' + eventIndex + 'item' + i + 'secondary"></div></div>').insertBefore($propsAdd);
+                var selectizeOptions = {
+                  options: options.items,
+                  maxItems: null,
+                  valueField: 'value',
+                  labelField: 'label',
+                  searchField: 'label'
+                }
+                $('#event' + eventIndex + 'item' + i + 'secondary').selectize(selectizeOptions);
+              });
+            } else if(operatorType == 'contains') {
+              var valueSelect = $('<div class="prop_select inline block value_selector_secondary event' + eventIndex + '"><div id="event' + eventIndex + 'item' + i + 'secondary"><input></input></div></div>').insertBefore($propsAdd);
+            } else if(operatorType == 'set' || operatorType == 'notset') {
+              // add a dummy container since there is no need for value selection in this case
+              var valueSelect = $('<div class="prop_select inline block value_selector_secondary event' + eventIndex + '"><div id="event' + eventIndex + 'item' + i + 'secondary"></div></div>').insertBefore($propsAdd);
+            }
+          });
+        } else {
+          var $propsAdd = $($('.right-and-secondary.event' + eventIndex)[i]);
+        }
+      }
+
+      // error alerts
+      function error(message) {
+        var alert = $('<div class="alert"><div class="alert-title">Error</div><div class="alert-content">' + message + '</div><div class="alert-ok">OK</div></div>');
+        alert.appendTo('body').fadeIn(200);
+      }
+      // close alerts
+      $('body').on('click', '.alert-ok', function() {
+          $('.alert').remove();
+      });
+
+      $('#event-add').on('click', function() {
+        var numEvents = $('.event_select').length;
+        addEvent(numEvents);
+      });
+
+      $(document).on('click', '.props-add', function() {
+        var eventIndex = this.id;
+        console.log(eventIndex);
+        var numProps = $('.prop_selector.event' + eventIndex).length;
+        console.log(numProps);
+
+        var localEventsList = [];
+        var localPropsList = [];
+        var localValuesList = [];
+
+        for (var i = 0, j = $('.event_select').length; i < j; i++) {
+          localEventsList[i] = [];
+          var localEventName = $('#event_select' + i).val();
+          for(k = 0; k < localEventName.split(',').length; k++) {
+            if(localEventName.split(',')[k] !== null && localEventName.split(',')[k] !== '') {
+              localEventsList[i].push(localEventName.split(',')[k]);
+            }
+          }
+          localPropsList[i] = [];
+          localValuesList[i] = [];
+          for(var z = 0, y = $('.prop_selector.event' + i).length; z < y; z++) {
+            var localPropsName = $($('.prop_selector.event' + i)[z]).val();
+            localPropsList[i].push(localPropsName);
+            localValuesList[i][z] = [];
+            var localValueName = $('#event' + i + 'item' + z).val();
+            if(localValueName !== undefined) {
+              for(k = 0; k < localValueName.split(',').length; k++) {
+                if(localValueName.split(',')[k] !== null) {
+                  localValuesList[i][z].push(localValueName.split(',')[k]);
+                }
+              }
+            }
+          }
+        }
+
+        eventList = localEventsList;
+        console.log('event list: ');
+        console.log(eventList);
+        propList = localPropsList;
+        console.log('props list: ');
+        console.log(propList);
+        valueList = localValuesList;
+        console.log('values list: ');
+        console.log(valueList);
+
+        console.log(propList[eventIndex].length);
+        if(numProps > 0) {
+          if(propList[eventIndex].length < numProps) { 
+            error('Please select a property key before proceeding');
+          } else {
+            if(valueList[eventIndex].length < propList[eventIndex].length) {
+              addValue(numProps-1, eventIndex);
+            } else {
+              addProp(numProps, eventIndex);
+            }
+          }
+        } else {
+          addProp(0, eventIndex);
+        }
+      });
+
+      $(document).on('click', '.props-add-secondary', function() {
+        var eventIndex = this.id;
+        console.log(eventIndex);
+        var numProps = $('.prop_selector_secondary.event' + eventIndex).length;
+        console.log(numProps);
+
+        var localEventsList = [];
+        var localPropsList = [];
+        var localValuesList = [];
+
+        for (var i = 0, j = $('.event_select').length; i < j; i++) {
+          localEventsList[i] = [];
+          var localEventName = $('#event_select' + i).val();
+          for(k = 0; k < localEventName.split(',').length; k++) {
+            if(localEventName.split(',')[k] !== null && localEventName.split(',')[k] !== '') {
+              localEventsList[i].push(localEventName.split(',')[k]);
+            }
+          }
+          localPropsList[i] = [];
+          localValuesList[i] = [];
+          for(var z = 0, y = $('.prop_selector_secondary.event' + i).length; z < y; z++) {
+            var localPropsName = $($('.prop_selector_secondary.event' + i)[z]).val();
+            localPropsList[i].push(localPropsName);
+            localValuesList[i][z] = [];
+            var localValueName = $('#event' + i + 'item' + z + 'secondary').val();
+            if(localValueName !== undefined) {
+              for(k = 0; k < localValueName.split(',').length; k++) {
+                if(localValueName.split(',')[k] !== null) {
+                  localValuesList[i][z].push(localValueName.split(',')[k]);
+                }
+              }
+            }
+          }
+        }
+
+        eventList = localEventsList;
+        console.log('event secondary list: ');
+        console.log(eventList);
+        propSecondaryList = localPropsList;
+        console.log('props secondary list: ');
+        console.log(propSecondaryList);
+        valueSecondaryList = localValuesList;
+        console.log('values secondary list: ');
+        console.log(valueSecondaryList);
+
+        console.log(propSecondaryList[eventIndex].length);
+        if(numProps > 0) {
+          if(propSecondaryList[eventIndex].length < numProps) { 
+            error('Please select a property key before proceeding');
+          } else {
+            if(valueSecondaryList[eventIndex].length < propSecondaryList[eventIndex].length) {
+              addSecondaryValue(numProps-1, eventIndex);
+            } else {
+              addSecondaryProp(numProps, eventIndex);
+            }
+          }
+        } else {
+          addSecondaryProp(0, eventIndex);
+        }
+      });
+
+      $('#event-remove').on('click', function() {
+        var numEvents = $('.event_select').length;
+        $($('.event_select')[numEvents-1]).remove();
+        $($('.property-container')[numEvents-1]).remove();
+        $($('.property-container-secondary')[numEvents-1]).remove();
+        $($('.right-arrow.events')[numEvents-2]).remove();
+      });
+
+      $(document).on('click', '.props-remove', function() {
+        var eventIndex = this.id;
+        console.log(eventIndex);
+        var numProps = $('.prop_selector.event' + eventIndex).length;
+        console.log(numProps);
+        $($('.value_selector.event' + eventIndex)[numProps-1]).remove();
+        $($('.prop_selector.event' + eventIndex)[numProps-1]).remove();
+        $($('.operator_selector.event' + eventIndex)[numProps-1]).remove();
+        $($('.right-and.event' + eventIndex)[numProps-2]).remove();
+        //$($('.right-arrow.event' + eventIndex)[numProps-1]).remove();
+      });
+
+      $(document).on('click', '.props-remove-secondary', function() {
+        var eventIndex = this.id;
+        console.log(eventIndex);
+        var numProps = $('.prop_selector_secondary.event' + eventIndex).length;
+        console.log(numProps);
+        $($('.value_selector_secondary.event' + eventIndex)[numProps-1]).remove();
+        $($('.prop_selector_secondary.event' + eventIndex)[numProps-1]).remove();
+        $($('.operator_selector_secondary.event' + eventIndex)[numProps-1]).remove();
+        $($('.right-and-secondary.event' + eventIndex)[numProps-2]).remove();
+        //$($('.right-arrow-secondary.event' + eventIndex)[numProps-1]).remove();
+      });
+
+      $('#run').on('click', function() {
+        console.log('Running query now...');
+
+        var localEventsList = [];
+        var localPropsList = [];
+        var localValuesList = [];
+        var emptyEvent = false;
+        var duplicateEvent = false;
+        for (var i = 0, j = $('.event_select').length; i < j; i++) {
+          localEventsList[i] = [];
+          var localEventName = $('#event_select' + i).val();
+          for(k = 0; k < localEventName.split(',').length; k++) {
+            if(localEventName.split(',')[k] !== null && localEventName.split(',')[k] !== '') {
+              localEventsList[i].push(localEventName.split(',')[k]);
+            } else if(localEventName.split(',')[k] == '') {
+              emptyEvent = true;
+            }
+          }
+          localPropsList[i] = [];
+          localValuesList[i] = [];
+          for(var z = 0, y = $('.prop_selector.event' + i).length; z < y; z++) {
+            var localPropsName = $($('.prop_selector.event' + i)[z]).val();
+            localPropsList[i].push(localPropsName);
+            localValuesList[i][z] = [];
+            var operatorType = $($('.operator_selector.event' + i)[z]).val();
+            if(operatorType == 'equals') {
+              var localValueName = $('#event' + i + 'item' + z).val();
+              if(localValueName !== undefined) {
+                for(k = 0; k < localValueName.split(',').length; k++) {
+                  if(localValueName.split(',')[k] !== null) {
+                    localValuesList[i][z].push(localValueName.split(',')[k]);
+                  }
+                }
+              }
+            } else if(operatorType == 'contains') {
+              localValueName = $('#event' + i + 'item' + z + ' input').val();
+              localValuesList[i][z].push(localValueName);
+            } else if(operatorType == 'set' || operatorType == 'notset') {
+              localValuesList[i][z].push(null);
+            }
+          }
+        }
+
+        eventList = localEventsList;
+        console.log('event list: ');
+        console.log(eventList);
+        propList = localPropsList;
+        console.log('props list: ');
+        console.log(propList);
+        valueList = localValuesList;
+        console.log('values list: ');
+        console.log(valueList);
+
+        var localEventsList = [];
+        var localPropsList = [];
+        var localValuesList = [];
+
+        for (var i = 0, j = $('.event_select').length; i < j; i++) {
+          localEventsList[i] = [];
+          var localEventName = $('#event_select' + i).val();
+          for(k = 0; k < localEventName.split(',').length; k++) {
+            if(localEventName.split(',')[k] !== null && localEventName.split(',')[k] !== '') {
+              localEventsList[i].push(localEventName.split(',')[k]);
+            }
+          }
+          localPropsList[i] = [];
+          localValuesList[i] = [];
+          for(var z = 0, y = $('.prop_selector_secondary.event' + i).length; z < y; z++) {
+            var localPropsName = $($('.prop_selector_secondary.event' + i)[z]).val();
+            localPropsList[i].push(localPropsName);
+            localValuesList[i][z] = [];
+            var localValueName = $('#event' + i + 'item' + z + 'secondary').val();
+            if(localValueName !== undefined) {
+              for(k = 0; k < localValueName.split(',').length; k++) {
+                if(localValueName.split(',')[k] !== null) {
+                  localValuesList[i][z].push(localValueName.split(',')[k]);
+                }
+              }
+            }
+          }
+        }
+
+        eventList = localEventsList;
+        console.log('event secondary list: ');
+        console.log(eventList);
+        propSecondaryList = localPropsList;
+        console.log('props secondary list: ');
+        console.log(propSecondaryList);
+        valueSecondaryList = localValuesList;
+        console.log('values secondary list: ');
+        console.log(valueSecondaryList);
+
+        if(eventList.length < 2) { 
+          error('Please select more than one event before proceeding');
+        } else if(emptyEvent) {
+          error('Please correct missing event(s) before proceeding');
+        } else {
+          runQuery();
+        }     
+      });
+
+      // run the query if all checks have been passed
+      var runQuery = function() {
+
+        $('#table').empty();
+        $("#funnelLine").empty();
+        $("#funnelBar").empty();
+        var img = document.createElement("IMG");
+        img.src = "http://www.wattis.org/MEDIA/01438.gif";
+        img.width = 256;
+        img.height = 256;
+        $("#funnelLine").html(img);
+        lineData = {};
+        barData = {};
+        exportData = [];
+
+        var funnelEvents = eventList;
+        var selectorEvents = [];
+
+        // gather primary property filters
+        for(i=0; i<eventList.length; i++) {
+          var propSelector = '';
+          for(j=0; j<propList[i].length; j++) {
+            var operatorType = $($('.operator_selector.event' + i)[j]).val();
+            if(operatorType == 'equals') {
+              for(k=0; k<valueList[i][j].length; k++) {
+                if(k==0) {
+                  propSelector = propSelector + '(';
+                }
+                if(k < valueList[i][j].length - 1) {
+                  propSelector = propSelector + 'string(properties["' + propList[i][j] + '"]) == "' + valueList[i][j][k] + '" or '
+                } else {
+                  propSelector = propSelector + 'string(properties["' + propList[i][j] + '"]) == "' + valueList[i][j][k] + '")'
+                }
+              }
+            } else if(operatorType == 'contains') {
+              propSelector = propSelector + '("' + valueList[i][j][0] + '" in properties["' + propList[i][j] + '"]) and defined(properties["' + propList[i][j] + '"])'
+            } else if(operatorType == 'set') {
+              propSelector = propSelector + 'defined(properties["' + propList[i][j] + '"])'
+            } else if(operatorType == 'notset') {
+              propSelector = propSelector + 'not defined(properties["' + propList[i][j] + '"])'
+            }
+            if(j < propList[i].length - 1) {
+              propSelector = propSelector + ' and ';
+            }
+          }
+          for(z=0; z<eventList[i].length; z++) {
+            if(propSelector !== '') {
+              selectorEvents.push({"event": eventList[i][z], "selector": propSelector, "label": i.toString()});
+            } else {
+              selectorEvents.push({"event": eventList[i][z], "label": i.toString()});
+            }
+          }
+        }
+
+        // gather secondary property filters
+        for(i=0; i<eventList.length; i++) {
+          var propSelector = '';
+          for(j=0; j<propSecondaryList[i].length; j++) {
+            var operatorType = $($('.operator_selector_secondary.event' + i)[j]).val();
+            if(operatorType == 'equals') {
+              for(k=0; k<valueSecondaryList[i][j].length; k++) {
+                if(k==0) {
+                  propSelector = propSelector + '(';
+                }
+                if(k < valueSecondaryList[i][j].length - 1) {
+                  propSelector = propSelector + 'string(properties["' + propSecondaryList[i][j] + '"]) == "' + valueSecondaryList[i][j][k] + '" or '
+                } else {
+                  propSelector = propSelector + 'string(properties["' + propSecondaryList[i][j] + '"]) == "' + valueSecondaryList[i][j][k] + '")'
+                }
+              }
+            } else if(operatorType == 'contains') {
+              propSelector = propSelector + '("' + valueSecondaryList[i][j][0] + '" in properties["' + propSecondaryList[i][j] + '"]) and defined(properties["' + propSecondaryList[i][j] + '"])'
+            } else if(operatorType == 'set') {
+              propSelector = propSelector + 'defined(properties["' + propSecondaryList[i][j] + '"])'
+            } else if(operatorType == 'notset') {
+              propSelector = propSelector + 'not defined(properties["' + propSecondaryList[i][j] + '"])'
+            }
+            if(j < propSecondaryList[i].length - 1) {
+              propSelector = propSelector + ' and ';
+            }
+          }
+          for(z=0; z<eventList[i].length; z++) {
+            if(propSelector !== '') {
+              selectorEvents.push({"event": eventList[i][z], "selector": propSelector, "label": i.toString()});
+            } else {
+              selectorEvents.push({"event": eventList[i][z], "label": i.toString()});
+            }
+          }
+        }
+
+        console.log('funnel events to query:');
+        console.log(funnelEvents);
+        console.log('funnel events to select:');
+        console.log(selectorEvents);
+
+        var funnelParams = {
+          to: new Date($('#date-select').val().to.getTime() + 60*60*1000*3).toISOString().substring(0,10), //adding buffer to date to accomodate for DST issues
+          from: new Date($('#date-select').val().from.getTime() + 60*60*1000*3).toISOString().substring(0,10), //adding buffer to date to accomodate for DST issues
+          events: funnelEvents,
+          selector: selectorEvents,
+          graph: chartTypeVal,
+          window: Number(document.getElementById('windowTime').value),
+        };
+
+        console.log('funnel params to query:');
+        console.log(funnelParams);
+
+        var script = $('#jql-funnel').html();
+
+        // run jql query for funnel data
+        MP.api.jql(script, funnelParams).done(function(funnelResults) {
+          console.log(funnelResults);
+          var keys = Object.keys(funnelResults[0]);
+          lineData['Conversion Rate'] = {};
+          var total = 0;
+          for(i=0; i<funnelResults.length; i++) {
+            var tempExport = {};
+            lineData['Conversion Rate'][funnelResults[i]['Date']] = funnelResults[i]['Conversion'];
+            tempExport['Conversion Rate'] = funnelResults[i]['Conversion'];
+            tempExport['Date'] = funnelResults[i]['Date'];
+            for(j=0; j<funnelEvents.length; j++) {
+              tempExport['Step ' + (j+1) + '. ' + funnelEvents[j]] = funnelResults[i][j];
+              if(i==0) {
+                barData[(j+1) + '. ' + funnelEvents[j]] = 0;
+              }
+              if(j==0) {
+                total += funnelResults[i][j];
+              }
+              barData[(j+1) + '. ' + funnelEvents[j]] += funnelResults[i][j];
+            }
+            exportData.push(tempExport);
+          }
+          if(chartTypeVal === 'line') {
+            $('#funnelLine').empty();
+            $("#funnelLine").MPChart({chartType: 'line'});
+            $("#funnelLine").MPChart('setData', lineData);
+          } else {
+            $('#funnelLine').empty();
+            $("#funnelBar").MPChart({chartType: 'bar', tooltipFormatter:
+              function () {
+                return '<b>Conversion Rate: ' + (this.y / total * 100).toFixed(2) + '%</b>';
+              }
+            });
+            $("#funnelBar").MPChart('setData', barData);
+          }
+          console.log(lineData);
+          console.log(barData);
+          console.log(exportData);
+
+          // table of results
+          $('#table').append('<table>');
+          $('#table').append('<tr>');
+          $('#table').append('<th class="comparison-table-header" >' + 'Date' + '</th>');
+          $('#table').append('<th class="comparison-table-header" >' + 'Funnel Conversion' + '</th>');
+          for(j=0; j<funnelEvents.length; j++) {
+            $('#table').append('<th class="comparison-table-header" >' + (j+1) + '. ' + funnelEvents[j] + '</th>');
+          }
+          $('#table').append('</tr>');
+
+          var keys = Object.keys(lineData['Conversion Rate']);
+          console.log(keys);
+
+          for(i=0; i<exportData.length; i++) {
+            $('#table').append('<tr>');
+            $('#table').append('<td class="comparison-table-data" >' + exportData[i]['Date'] + '</td>');
+            $('#table').append('<td class="comparison-table-data" >' + exportData[i]['Conversion Rate'].toFixed(2) + '%' + '</td>');
+            for(j=0; j<funnelEvents.length; j++) {
+              $('#table').append('<th class="comparison-table-header" >' + exportData[i]['Step '+ (j+1) + '. ' + funnelEvents[j]] + '</th>');
+            }
+            $('#table').append('</tr>');
+          }
+          $('#table').append('</table>');
+        })
+        .fail(function(error) {
+          console.log('report failure. please check XHR request above and error printout below for more details.');
+          console.log(error);
+          $('#funnelLine').empty();
+          var img = document.createElement("IMG");
+          img.src = "https://www.formassembly.com/images/illustrations/robot-msg-error.png";
+          img.width = 256;
+          img.height = 256;
+          $("#funnelLine").html(img);
+        })
+      }
+
+      // export results
+      $("#export").click(function (event) {
+        downloadCSV({ filename: "funnel-data.csv", data: exportData });
+      });
+
+      function convertArrayOfObjectsToCSV(args) {
+        var result, ctr, keys, columnDelimiter, lineDelimiter, data;
+
+        data = args.data || null;
+        if (data == null || !data.length) {
+          return null;
+        }
+
+        columnDelimiter = args.columnDelimiter || ',';
+        lineDelimiter = args.lineDelimiter || '\n';
+
+        keys = Object.keys(data[0]);
+
+        result = '';
+        result += keys.join(columnDelimiter);
+        result += lineDelimiter;
+
+        data.forEach(function(item) {
+          ctr = 0;
+          keys.forEach(function(key) {
+            if (ctr > 0) result += columnDelimiter;
+
+            result += item[key];
+            ctr++;
+          });
+          result += lineDelimiter;
+        });
+
+        return result;
+      }
+
+      function downloadCSV(args) {
+        var data, filename, link;
+
+        data = args.data || exportData;
+
+        var csv = convertArrayOfObjectsToCSV({
+          data: data
+        });
+        if (csv == null) return;
+
+        filename = args.filename || 'export.csv';
+
+        if (!csv.match(/^data:text\/csv/i)) {
+          csv = 'data:text/csv;charset=utf-8,' + csv;
+        }
+        data = encodeURI(csv);
+
+        link = document.createElement('a');
+        link.setAttribute('href', data);
+        link.setAttribute('download', filename);
+        link.click();
+      }
+    </script>
+
+    <script id='jql-funnel'>
+      function main() {
+        function createState() {
+          var res = {};
+          for(i=0; i<params.events.length; i++) {
+            res['step'+i] = 0;
+            res['step'+i+'current'] = 0;
+          }
+          res['start'] = 0;
+          return res;
+        }
+        
+        return Events({
+          from_date: params.from,
+          to_date:   params.to,
+          event_selectors: params.selector
+        })
+        .groupByUser([event => new Date(event.time).toISOString().substring(0,10)], function(state, events) {
+          state = state || createState();
+          _.each(events, function(event) {
+            for(i=0; i<params.events.length; i++) {
+              if(event.labels.indexOf(i.toString()) > -1) {
+                if(i === 0) { // first step
+                  if(event.time - params.window*60*1000 > state.start) {
+                    state['step'+i] += 1;
+                    for(j=0; j<params.events.length; j++) {
+                      state['step'+j+'current'] = 0;
+                    }
+                    state['step'+i+'current'] = 1;
+                    state.start = event.time;
+                  }
+                } else { // other steps
+                  if(event.time - params.window*60*1000 <= state.start && state['step'+i+'current'] === 0 && state['step'+(i-1)+'current'] == 1) {
+                    state['step'+i] += 1;
+                    state['step'+i+'current'] = 1;
+                  } else if(event.time - params.window*60*1000 > state.start) {
+                    for(j=0; j<params.events.length; j++) {
+                      state['step'+j+'current'] = 0;
+                    }
+                  }
+                }
+              }
+            }
+          })
+          return state;
+        })
+        .filter(item => item.value.start > 0)
+        .map(function(item) {
+          var res = {};
+          res['Date'] = item.key[1];
+          for(i=0; i<params.events.length; i++) {
+            res[i] = item.value['step'+i];
+          }
+          return res;
+        })
+        .groupBy([function(item) {
+          var date = item.Date;
+          delete item.Date;
+          return date;
+        }], mixpanel.reducer.object_merge())
+        .map(function(item) {
+          var res = {};
+          res['Date'] = item.key[0];
+          for(i=0; i<params.events.length; i++) {
+            res[i] = item.value[i];
+          }
+          res['Conversion'] = (item.value[params.events.length-1] / item.value[0] * 100);
+          return res;
+        })
+      }
+
     </script>
   </body>
 </html>
